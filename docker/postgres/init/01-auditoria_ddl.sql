@@ -1,460 +1,124 @@
---
--- PostgreSQL database dump
---
+--DROP SCHEMA public CASCADE;
+--CREATE SCHEMA public;
 
--- Dumped from database version 16.8 (Debian 16.8-1.pgdg120+1)
--- Dumped by pg_dump version 16.8 (Debian 16.8-1.pgdg120+1)
-
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
-
---
--- Name: public; Type: SCHEMA; Schema: -; Owner: -
---
-
--- *not* creating schema, since initdb creates it
-
-
---
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON SCHEMA public IS '';
-
-
-SET default_tablespace = '';
-
-SET default_table_access_method = heap;
-
---
--- Name: auditoria; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.auditoria (
-    pagamento date,
-    valor numeric(15,2),
-    campanha_id bigint NOT NULL,
-    checklist_id bigint,
-    conclusao timestamp(6) with time zone,
-    created_at timestamp(6) with time zone NOT NULL,
+CREATE TABLE public.usuario (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ativo boolean NOT NULL,
+    login character varying(100) NOT NULL,
+    email character varying(255) NOT NULL,
+    nome character varying(255) NOT NULL,
+    created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by bigint NOT NULL,
-    id bigint NOT NULL,
-    inicio timestamp(6) with time zone,
-    updated_at timestamp(6) with time zone NOT NULL,
-    updated_by bigint NOT NULL,
-    status character varying(50) NOT NULL,
-    classificacao character varying(100),
-    contrato character varying(100),
-    criterio character varying(100),
-    departamento character varying(100),
-    diretoria character varying(100),
-    processo character varying(100) NOT NULL,
-    objeto character varying(1000),
-    fornecedor character varying(255),
-    CONSTRAINT auditoria_criterio_check CHECK (((criterio)::text = ANY ((ARRAY['MATERIALIDADE'::character varying, 'TEMPORALIDADE'::character varying, 'ALEATORIEDADE'::character varying])::text[]))),
-    CONSTRAINT auditoria_status_check CHECK (((status)::text = ANY ((ARRAY['ABERTA'::character varying, 'EM_ANALISE'::character varying, 'EM_REGULARIZACAO'::character varying, 'CONFORME'::character varying, 'NAO_CONFORME'::character varying])::text[])))
+    updated_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_by bigint NOT NULL
+);
+ALTER TABLE ONLY public.usuario ADD CONSTRAINT usuario_email_key UNIQUE (email);
+ALTER TABLE ONLY public.usuario ADD CONSTRAINT usuario_login_key UNIQUE (login);
+
+CREATE TABLE public.perfil (
+   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+   nome character varying(30) NOT NULL
+);
+ALTER TABLE ONLY public.perfil ADD CONSTRAINT perfil_nome_key UNIQUE (nome);
+
+CREATE TABLE public.usuario_perfil (
+   usuario_id bigint NOT NULL,
+   perfil_id bigint NOT NULL,
+   CONSTRAINT fk_usuper_usuario_id   FOREIGN KEY (usuario_id) REFERENCES usuario(id),
+   CONSTRAINT fk_usuper_perfil_id   FOREIGN KEY (perfil_id) REFERENCES perfil(id)
+);
+ALTER TABLE ONLY public.usuario_perfil ADD CONSTRAINT usuario_perfil_pkey PRIMARY KEY (perfil_id, usuario_id);
+
+CREATE TABLE public.parametrizacao (
+   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+   ativo boolean NOT NULL,
+   perc_aleatorio numeric(5,2),
+   perc_diretoria numeric(5,2),
+   perc_material numeric(5,2),
+   perc_temporal numeric(5,2),
+   recorrencia_material integer,
+   tempo_sem_auditoria integer,
+   versao character varying(50) NOT NULL,
+   observacao text,
+   created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   created_by bigint NOT NULL,
+   updated_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   updated_by bigint NOT NULL,
+   CONSTRAINT fk_paramet_created_by   FOREIGN KEY (created_by) REFERENCES usuario(id),
+   CONSTRAINT fk_paramet_updated_by   FOREIGN KEY (updated_by) REFERENCES usuario(id)
 );
 
+CREATE TABLE public.campanha (
+     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     competencia integer NOT NULL,
+     qtd_amostra integer,
+     qtd_universo integer,
+     aprovacao timestamp(6) with time zone,
+     execucao_motor timestamp(6) with time zone,
+     parametrizacao_id bigint NOT NULL,
+     created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     created_by bigint NOT NULL,
+     updated_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     updated_by bigint NOT NULL,
+     CONSTRAINT fk_campanha_created_by FOREIGN KEY (created_by) REFERENCES usuario(id),
+     CONSTRAINT fk_campanha_updated_by FOREIGN KEY (updated_by) REFERENCES usuario(id),
+     CONSTRAINT fk_campanha_paramet FOREIGN KEY (parametrizacao_id) REFERENCES parametrizacao (id)
+);
 
---
--- Name: auditoria_historico; Type: TABLE; Schema: public; Owner: -
---
+CREATE TABLE public.auditoria (
+      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+      pagamento date,
+      valor numeric(15,2),
+      campanha_id bigint NOT NULL,
+      checklist_id bigint,
+      conclusao timestamp(6) with time zone,
+      inicio timestamp(6) with time zone,
+      status character varying(50) NOT NULL,
+      classificacao character varying(100),
+      contrato character varying(100),
+      criterio character varying(100),
+      departamento character varying(100),
+      diretoria character varying(100),
+      processo character varying(100) NOT NULL,
+      objeto character varying(1000),
+      fornecedor character varying(255),
+      created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      created_by bigint NOT NULL,
+      updated_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_by bigint NOT NULL,
+      CONSTRAINT fk_audit_created_by FOREIGN KEY (created_by) REFERENCES usuario(id),
+      CONSTRAINT fk_audit_updated_by FOREIGN KEY (updated_by) REFERENCES usuario(id),
+      CONSTRAINT fk_audit_campanha   FOREIGN KEY (campanha_id) REFERENCES campanha (id)
+    );
 
 CREATE TABLE public.auditoria_historico (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     pagamento date,
     valor numeric(15,2),
     auditoria_des_id bigint,
     auditoria_ori_id bigint,
-    created_at timestamp(6) with time zone NOT NULL,
-    created_by bigint NOT NULL,
-    id bigint NOT NULL,
     classificacao character varying(100),
     contrato character varying(100),
     diretoria character varying(100),
     processo character varying(100),
     fornecedor character varying(255),
-    motivo text NOT NULL
+    motivo text NOT NULL,
+    created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by bigint NOT NULL,
+    CONSTRAINT fk_hist_created_by FOREIGN KEY (created_by) REFERENCES usuario(id)
 );
-
-
---
--- Name: auditoria_historico_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.auditoria_historico ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME public.auditoria_historico_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: auditoria_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.auditoria ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME public.auditoria_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: auditoria_legado; Type: TABLE; Schema: public; Owner: -
---
 
 CREATE TABLE public.auditoria_legado (
-    referencia integer,
-    created_at timestamp(6) with time zone NOT NULL DEFAULT now(),
-    id bigint NOT NULL,
-    contrato character varying(255),
-    diretoria character varying(255),
-    fornecedor character varying(255),
-    processo character varying(255),
-    setor character varying(255)
+     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+     referencia integer,
+     contrato character varying(255),
+     diretoria character varying(255),
+     fornecedor character varying(255),
+     processo character varying(255),
+     setor character varying(255),
+     created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-
---
--- Name: auditoria_legado_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.auditoria_legado ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME public.auditoria_legado_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: campanha; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.campanha (
-    competencia integer NOT NULL,
-    qtd_amostra integer,
-    qtd_universo integer,
-    aprovacao timestamp(6) with time zone,
-    created_at timestamp(6) with time zone NOT NULL,
-    created_by bigint NOT NULL,
-    execucao_motor timestamp(6) with time zone,
-    id bigint NOT NULL,
-    parametrizacao_id bigint NOT NULL,
-    updated_at timestamp(6) with time zone NOT NULL,
-    updated_by bigint NOT NULL
-);
-
-
---
--- Name: campanha_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.campanha ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME public.campanha_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: parametrizacao; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.parametrizacao (
-    ativo boolean NOT NULL,
-    perc_aleatorio numeric(38,2),
-    perc_diretoria numeric(38,2),
-    perc_material numeric(38,2),
-    perc_temporal numeric(38,2),
-    recorrencia_material integer,
-    tempo_sem_auditoria integer,
-    created_at timestamp(6) with time zone NOT NULL,
-    created_by bigint NOT NULL,
-    id bigint NOT NULL,
-    updated_at timestamp(6) with time zone NOT NULL,
-    updated_by bigint NOT NULL,
-    versao character varying(50) NOT NULL,
-    observacao text
-);
-
-
---
--- Name: parametrizacao_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.parametrizacao ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME public.parametrizacao_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: perfil; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.perfil (
-    id bigint NOT NULL,
-    nome character varying(30) NOT NULL,
-    CONSTRAINT perfil_nome_check CHECK (((nome)::text = ANY ((ARRAY['ADMIN'::character varying, 'AUDITOR'::character varying, 'GESTOR'::character varying, 'AUDITADO'::character varying, 'DEFAULT'::character varying])::text[])))
-);
-
-
---
--- Name: perfil_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.perfil ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME public.perfil_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: usuario; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.usuario (
-    ativo boolean NOT NULL,
-    created_at timestamp(6) with time zone NOT NULL,
-    created_by bigint,
-    id bigint NOT NULL,
-    updated_at timestamp(6) with time zone NOT NULL,
-    updated_by bigint,
-    login character varying(100) NOT NULL,
-    email character varying(255) NOT NULL,
-    nome character varying(255) NOT NULL
-);
-
-
---
--- Name: usuario_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-ALTER TABLE public.usuario ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
-    SEQUENCE NAME public.usuario_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1
-);
-
-
---
--- Name: usuario_perfil; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.usuario_perfil (
-    perfil_id bigint NOT NULL,
-    usuario_id bigint NOT NULL
-);
-
-
---
--- Name: auditoria_historico auditoria_historico_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.auditoria_historico
-    ADD CONSTRAINT auditoria_historico_pkey PRIMARY KEY (id);
-
-
---
--- Name: auditoria_legado auditoria_legado_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.auditoria_legado
-    ADD CONSTRAINT auditoria_legado_pkey PRIMARY KEY (id);
-
-
---
--- Name: auditoria auditoria_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.auditoria
-    ADD CONSTRAINT auditoria_pkey PRIMARY KEY (id);
-
-
---
--- Name: campanha campanha_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.campanha
-    ADD CONSTRAINT campanha_pkey PRIMARY KEY (id);
-
-
---
--- Name: parametrizacao parametrizacao_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.parametrizacao
-    ADD CONSTRAINT parametrizacao_pkey PRIMARY KEY (id);
-
-
---
--- Name: perfil perfil_nome_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.perfil
-    ADD CONSTRAINT perfil_nome_key UNIQUE (nome);
-
-
---
--- Name: perfil perfil_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.perfil
-    ADD CONSTRAINT perfil_pkey PRIMARY KEY (id);
-
-
---
--- Name: usuario usuario_email_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.usuario
-    ADD CONSTRAINT usuario_email_key UNIQUE (email);
-
-
---
--- Name: usuario usuario_login_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.usuario
-    ADD CONSTRAINT usuario_login_key UNIQUE (login);
-
-
---
--- Name: usuario_perfil usuario_perfil_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.usuario_perfil
-    ADD CONSTRAINT usuario_perfil_pkey PRIMARY KEY (perfil_id, usuario_id);
-
-
---
--- Name: usuario usuario_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.usuario
-    ADD CONSTRAINT usuario_pkey PRIMARY KEY (id);
-
-
---
--- Name: usuario_perfil fk22cgfn0obntlvqyfn33pyk24d; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.usuario_perfil
-    ADD CONSTRAINT fk22cgfn0obntlvqyfn33pyk24d FOREIGN KEY (perfil_id) REFERENCES public.perfil(id);
-
-
---
--- Name: parametrizacao fk4w2adpu0690ncyxq7903rt7a2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.parametrizacao
-    ADD CONSTRAINT fk4w2adpu0690ncyxq7903rt7a2 FOREIGN KEY (created_by) REFERENCES public.usuario(id);
-
-
---
--- Name: parametrizacao fk6w5chom7ey13hxm5xr319f5ou; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.parametrizacao
-    ADD CONSTRAINT fk6w5chom7ey13hxm5xr319f5ou FOREIGN KEY (updated_by) REFERENCES public.usuario(id);
-
-
---
--- Name: campanha fk91stjj56y4k7srk3yy57to030; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.campanha
-    ADD CONSTRAINT fk91stjj56y4k7srk3yy57to030 FOREIGN KEY (created_by) REFERENCES public.usuario(id);
-
-
---
--- Name: campanha fkb3n4qjjilo7o0xq92hkx4o88e; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.campanha
-    ADD CONSTRAINT fkb3n4qjjilo7o0xq92hkx4o88e FOREIGN KEY (updated_by) REFERENCES public.usuario(id);
-
-
---
--- Name: campanha fkbydeg8xrt408mja9o89iwcwr2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.campanha
-    ADD CONSTRAINT fkbydeg8xrt408mja9o89iwcwr2 FOREIGN KEY (parametrizacao_id) REFERENCES public.parametrizacao(id);
-
-
---
--- Name: auditoria fkd4gf9cumegnodxrexixtvax38; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.auditoria
-    ADD CONSTRAINT fkd4gf9cumegnodxrexixtvax38 FOREIGN KEY (created_by) REFERENCES public.usuario(id);
-
-
---
--- Name: auditoria fkdh5s3349yw46817wuowkdhf6k; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.auditoria
-    ADD CONSTRAINT fkdh5s3349yw46817wuowkdhf6k FOREIGN KEY (campanha_id) REFERENCES public.campanha(id);
-
-
---
--- Name: auditoria fkg4r7b44nfowvsjyhrr9nmb53o; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.auditoria
-    ADD CONSTRAINT fkg4r7b44nfowvsjyhrr9nmb53o FOREIGN KEY (updated_by) REFERENCES public.usuario(id);
-
-
---
--- Name: auditoria_historico fklrkannbvxodywmt9u8ndlxmes; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.auditoria_historico
-    ADD CONSTRAINT fklrkannbvxodywmt9u8ndlxmes FOREIGN KEY (created_by) REFERENCES public.usuario(id);
-
-
---
--- Name: usuario_perfil fknrjqnbylalt4ykxbcef24f57w; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.usuario_perfil
-    ADD CONSTRAINT fknrjqnbylalt4ykxbcef24f57w FOREIGN KEY (usuario_id) REFERENCES public.usuario(id);
-
-
---
--- PostgreSQL database dump complete
---
-
+CREATE INDEX idx_campanha_parametrizacao_id ON public.campanha(parametrizacao_id);
+CREATE INDEX idx_auditoria_campanha_id ON public.auditoria(campanha_id);
+CREATE INDEX idx_auditoria_historico_audit_des_id ON public.auditoria_historico (auditoria_des_id);
