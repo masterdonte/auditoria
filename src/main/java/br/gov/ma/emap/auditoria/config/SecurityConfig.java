@@ -40,6 +40,9 @@ public class SecurityConfig {
     @Value("${app.public-urls}")
     private String[] publicUrls;
 
+    @Value("${app.allowed-origins}")
+    private String[] allowedOrigins;
+
     @Value("${spring.ldap.urls}")
     private String ldapUrl;
 
@@ -94,7 +97,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(allowedOrigins));
         configuration.setAllowedMethods(
                 List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
         );
