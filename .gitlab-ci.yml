@@ -5,6 +5,7 @@ variables:
   TRIVY_TIMEOUT: 10m0s
   TIMEOUT_SECONDS: 2600
   ARGUMENTS_BUILD: '--build-arg MAVEN_PROFILE=prod'
+  DEV_ARGUMENTS_BUILD: '--build-arg MAVEN_PROFILE=homo'
   CS_IMAGE: registry.portodoitaqui.com/$SERVICE_NAME:${CI_COMMIT_SHORT_SHA}
   ORG: 'porto'
 

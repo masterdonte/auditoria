@@ -24,7 +24,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        MAVEN_PROFILE: homo
+        MAVEN_PROFILE: dev
     container_name: auditoria
     ports:
       - "80:80"

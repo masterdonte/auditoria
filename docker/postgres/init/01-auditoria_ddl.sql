@@ -8,9 +8,9 @@ CREATE TABLE public.usuario (
     email character varying(255) NOT NULL,
     nome character varying(255) NOT NULL,
     created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by bigint NOT NULL,
+    created_by bigint NULL,
     updated_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_by bigint NOT NULL
+    updated_by bigint NULL
 );
 ALTER TABLE ONLY public.usuario ADD CONSTRAINT usuario_email_key UNIQUE (email);
 ALTER TABLE ONLY public.usuario ADD CONSTRAINT usuario_login_key UNIQUE (login);

@@ -25,17 +25,17 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.usuario(), request.senha())
         );
-        System.out.println("PASSOU AQUI 1");
+
         Usuario usuario = usuarioRepository.findByLogin(authentication.getName()).orElseThrow(() ->
                 new BusinessException("Usuário não possui acesso ao sistema")
         );
-        System.out.println("PASSOU AQUI 2");
+
         if (!usuario.isEnabled()) {
             throw new DisabledException("Usuário desativado");
         }
-        System.out.println("PASSOU AQUI 3");
+
         String token = jwtService.gerarToken(usuario);
-        System.out.println("PASSOU AQUI 4");
+
         return LoginResponse.from(usuario, token);
     }
 
