@@ -119,6 +119,27 @@ CREATE TABLE public.auditoria_legado (
      created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE public.auditoria_auditor (
+      id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
+      auditoria_id bigint NOT NULL,
+      auditor_id bigint NOT NULL,
+
+      inicio timestamp(6) with time zone,
+      fim timestamp(6) with time zone,
+      motivo_encerramento character varying(255),
+
+      created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      created_by bigint NOT NULL,
+      updated_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_by bigint NOT NULL,
+      CONSTRAINT fk_audit_auditor_created_by FOREIGN KEY (created_by) REFERENCES usuario(id),
+      CONSTRAINT fk_audit_auditor_updated_by FOREIGN KEY (updated_by) REFERENCES usuario(id),
+      CONSTRAINT fk_audit_auditor_auditoria FOREIGN KEY (auditoria_id) REFERENCES auditoria (id),
+      CONSTRAINT fk_audit_auditor_auditor FOREIGN KEY (updated_by) REFERENCES usuario(id)
+);
+
 CREATE INDEX idx_campanha_parametrizacao_id ON public.campanha(parametrizacao_id);
 CREATE INDEX idx_auditoria_campanha_id ON public.auditoria(campanha_id);
 CREATE INDEX idx_auditoria_historico_audit_des_id ON public.auditoria_historico (auditoria_des_id);
+CREATE UNIQUE INDEX uq_auditoria_auditor_ativo ON auditoria_auditor (auditoria_id, auditor_id) WHERE fim IS NULL;
