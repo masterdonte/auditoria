@@ -4,6 +4,7 @@ import br.gov.ma.emap.auditoria.dto.request.AuthRequest;
 import br.gov.ma.emap.auditoria.dto.response.LoginResponse;
 import br.gov.ma.emap.auditoria.service.AuthService;
 import br.gov.ma.emap.auditoria.service.ClickHouseService;
+import br.gov.ma.emap.auditoria.service.EcmClientService;
 import br.gov.ma.emap.auditoria.service.LdapService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,8 @@ public class AuthController {
     private final ClickHouseService clickService;
     private final LdapService ldapService;
 
+    private final EcmClientService ecmService;
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid AuthRequest credential) {
         return ResponseEntity.ok(service.login(credential));
@@ -40,4 +43,8 @@ public class AuthController {
         return ResponseEntity.ok(ldapService.search(login));
     }
 
+    @GetMapping("/teste")
+    public ResponseEntity<?> buscaCampanha(@RequestParam String titulo) {
+        return ResponseEntity.ok(ecmService.buscarAuditoria(titulo));
+    }
 }
