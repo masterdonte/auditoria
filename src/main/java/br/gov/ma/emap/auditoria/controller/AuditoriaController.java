@@ -2,6 +2,7 @@ package br.gov.ma.emap.auditoria.controller;
 
 import br.gov.ma.emap.auditoria.dto.ProcessoDTO;
 import br.gov.ma.emap.auditoria.dto.request.AuditoriaRequest;
+import br.gov.ma.emap.auditoria.dto.request.DistribuicaoRequest;
 import br.gov.ma.emap.auditoria.dto.request.MotivoRequest;
 import br.gov.ma.emap.auditoria.dto.response.AuditoriaResponse;
 import br.gov.ma.emap.auditoria.model.AuditoriaAuditor;
@@ -66,16 +67,11 @@ public class AuditoriaController {
         return ResponseEntity.noContent().build();
     }
 
-    // APAGA ESSES DEPOIS
-    @GetMapping("/legados")
-    public ResponseEntity<List<AuditoriaLegado>> legados(@RequestParam Integer meses) {
-        return ResponseEntity.ok(service.legados(meses));
-    }
-
-    @GetMapping("/cubo")
-    public ResponseEntity<List<ProcessoDTO>> cubo(@RequestParam YearMonth ref) {
-        List<ProcessoDTO> processos = clickHouseService.buscarDadosCubo(ref);
-        return ResponseEntity.ok(processos);
+    @PostMapping("/campanhas/{campanhaId}/distribuicao-manual")
+    public ResponseEntity<Void> distribuirManualmente(@PathVariable Long campanhaId,
+                                                      @RequestBody List<DistribuicaoRequest> distribuicoes) {
+        auditoriaAuditorService.distribuirManualmente(campanhaId,distribuicoes);
+        return ResponseEntity.noContent().build();
     }
 
 }

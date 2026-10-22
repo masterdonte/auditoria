@@ -109,6 +109,7 @@ public class AuditoriaService {
     private Auditoria toAuditoria(AmostraDTO dto, Campanha campanha, Usuario usuario) {
         return Auditoria.builder()
                 .campanha(campanha)
+                .processoId(dto.processoid())
                 .processo(dto.processo())
                 .contrato(dto.contrato())
                 .objeto(dto.objeto())
@@ -123,11 +124,4 @@ public class AuditoriaService {
                 .createdBy(usuario)
                 .updatedBy(usuario).build();
     }
-
-    public List<AuditoriaLegado> legados(Integer meses) {
-        YearMonth yearMonth = YearMonth.now().minusMonths(meses);
-        int referencia = yearMonth.getYear() * 100 + yearMonth.getMonthValue();
-        return auditoriaLegadoRepository.findByReferenciaGreaterThanEqual(referencia);
-    }
-
 }

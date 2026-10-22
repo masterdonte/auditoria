@@ -56,6 +56,12 @@ public class Campanha {
 
     private OffsetDateTime aprovacao;
 
+    @Column(name = "ecm_cod_audit")
+    private Long ecmCodAudit;
+
+    @Column(name = "ecm_last_sync")
+    private OffsetDateTime ecmLastSync;
+
     public void aprovar(Usuario usuario) {
         setAprovacao(OffsetDateTime.now(ZoneId.of("America/Fortaleza")));
         setUpdatedBy(usuario);

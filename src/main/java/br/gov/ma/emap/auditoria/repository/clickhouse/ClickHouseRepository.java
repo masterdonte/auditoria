@@ -2,6 +2,7 @@ package br.gov.ma.emap.auditoria.repository.clickhouse;
 
 import br.gov.ma.emap.auditoria.dto.ProcessoDTO;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -96,6 +97,15 @@ public class ClickHouseRepository {
                 );
             };
 
+    public Long buscarEcmUserId(String login){
+        String sql = "SELECT ID FROM PROCESSOS_SILVER.USUARIOS WHERE ATIVO = 'ATIVO' AND USER_NAME = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, Long.class, login);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
     public List<Map<String, Object>> version() {
         String sql = """                
                 SELECT currentUser() as usuario, version() as version, hostName() as host, name, value FROM system.settings
@@ -105,22 +115,3 @@ public class ClickHouseRepository {
     }
 
 }
-
-/*
-
-(rs, rowNum) -> new ProcessoDTO(
-                        //rs.getLong("LANID"),
-                        rs.getLong("ECMID"),
-                        rs.getString("FORNECEDOR"),
-                        rs.getString("PROCESSO"),
-                        rs.getString("CONTRATO"),
-                        rs.getBigDecimal("VALOR_ORIGINAL"),
-                        //rs.getBigDecimal("LIQUIDO"),
-                        rs.getTimestamp("DATA_BAIXA").toLocalDateTime(),
-                        rs.getString("CLASSIFICACAO"),
-                        //rs.getString("CLAS_FINANCEIRO"),
-                        rs.getString("DEPARTAMENTO"),
-                        rs.getString("DIRETORIA")
-                ),
-
-* */

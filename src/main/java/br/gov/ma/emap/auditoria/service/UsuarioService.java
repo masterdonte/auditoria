@@ -20,15 +20,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
 
-    private final LdapService ldapService; //criar chave => UNIQUE (usuario_id, perfil_id)
+    private final LdapService ldapService;
     private final UsuarioRepository repository;
     private final PerfilRepository perfilRepository;
+    private final ClickHouseService clickHouseService;
 
     @Transactional(readOnly = true)
     public Page<UsuarioResponse> listar(String search, Pageable pageable) {
@@ -52,6 +54,8 @@ public class UsuarioService {
             throw new BusinessException("Usuário já cadastrado no sistema");
         }
 
+        long ecmUserId = clickHouseService.buscarEcmUserId(request.login());
+
         Perfil perfilDefault = buscarPerfil(TipoPerfil.DEFAULT);
 
         Usuario usuario = Usuario.builder()
@@ -60,6 +64,7 @@ public class UsuarioService {
                 .email(usuarioAd.email())
                 .ativo(true)
                 .perfis(new HashSet<>(Set.of(perfilDefault)))
+                .ecmUserId(ecmUserId)
                 .build();
 
         return UsuarioResponse.from(repository.save(usuario));
@@ -115,6 +120,12 @@ public class UsuarioService {
     public Usuario getUsuarioLogado() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
         return repository.findByLogin(login).orElseThrow(() ->new BusinessException("Usuário autenticado não encontrado"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<UsuarioResponse> listarAtivosPorPerfil(TipoPerfil perfil) {
+        //return repository.findDistinctByAtivoTrueAndPerfisNome(perfil).stream().map(UsuarioResponse::from).toList();
+        return repository.findAtivosByPerfilComPerfis(perfil).stream().map(UsuarioResponse::from).toList();
     }
 }
 

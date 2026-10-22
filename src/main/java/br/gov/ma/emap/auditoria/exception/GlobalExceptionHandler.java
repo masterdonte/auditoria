@@ -18,9 +18,15 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({ BusinessException.class })
+    @ExceptionHandler({ BusinessException.class})
     public ResponseEntity<?> handleBusinessException(BusinessException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(EcmException.class)
+    public ResponseEntity<?> handleEcmException(EcmException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(),HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.badRequest().body(error);
     }
 

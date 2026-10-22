@@ -31,4 +31,11 @@ public class ClickHouseService {
     public List<Map<String, Object>> version(){
         return repository.version();
     }
+
+    public long buscarEcmUserId(String login) {
+        Long ecmUserId = repository.buscarEcmUserId(login);
+        if(ecmUserId == null)
+            throw new BusinessException("Usuário não cadastrado no ECM ou não está ativo.");
+        return ecmUserId;
+    }
 }

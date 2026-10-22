@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/usuario")
@@ -21,7 +23,6 @@ public class UsuarioController {
     private final UsuarioService service;
 
     @GetMapping
-    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<UsuarioResponse>> listar(@RequestParam String search, Pageable pageable) {
         return ResponseEntity.ok(service.listar(search, pageable));
     }
@@ -50,6 +51,11 @@ public class UsuarioController {
     @GetMapping("/perfis")
     public ResponseEntity<TipoPerfil[]> listarPerfis() {
         return ResponseEntity.ok(TipoPerfil.values());
+    }
+
+    @GetMapping("/ativos")
+    public ResponseEntity<List<UsuarioResponse>> listarAtivosPorPerfil(@RequestParam TipoPerfil perfil) {
+        return ResponseEntity.ok(service.listarAtivosPorPerfil(perfil));
     }
 
 }

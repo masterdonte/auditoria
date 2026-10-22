@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record AmostraDTO(
+        Long   processoid,
         String processo,
         String contrato,
         String objeto,
@@ -18,7 +19,7 @@ public record AmostraDTO(
         CriterioAmostra criterio
 ) {
     public static AmostraDTO from(ProcessoDTO p, CriterioAmostra criterio) {
-        return new AmostraDTO(p.processo(), p.contrato(), p.objeto(), p.fornecedor(),
+        return new AmostraDTO(p.ecmId(), p.processo(), p.contrato(), p.objeto(), p.fornecedor(),
                 p.departamento(), p.diretoria(), p.valorOriginal(),
                 p.dataBaixa().toLocalDate(), p.classificacao(), criterio);
     }

@@ -50,6 +50,9 @@ public class Auditoria {
     @Column(nullable = false, length = 100)
     private String processo;
 
+    @Column(name = "ecm_processo_id")
+    private Long processoId;
+
     @Column(length = 100)
     private String contrato;
 

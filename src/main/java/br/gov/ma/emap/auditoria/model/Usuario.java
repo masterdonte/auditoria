@@ -49,6 +49,9 @@ public class Usuario implements UserDetails {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
+    @Column(name = "ecm_user_id", nullable = false)
+    private Long ecmUserId;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "usuario_perfil", joinColumns = @JoinColumn(name = "usuario_id"),inverseJoinColumns = @JoinColumn(name = "perfil_id"))
     private Set<Perfil> perfis = new HashSet<>();

@@ -5,6 +5,8 @@ import br.gov.ma.emap.auditoria.model.AuditoriaAuditor;
 import br.gov.ma.emap.auditoria.model.Campanha;
 import br.gov.ma.emap.auditoria.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,5 +19,12 @@ public interface AuditoriaAuditorRepository extends JpaRepository<AuditoriaAudit
     List<AuditoriaAuditor> findByAuditoriaAndFimIsNull(Auditoria auditoria);
     Optional<AuditoriaAuditor> findByAuditoriaAndAuditorAndFimIsNull(Auditoria auditoria, Usuario auditor);
     boolean existsByAuditoriaCampanha(Campanha campanha);
+    List<AuditoriaAuditor> findByAuditoriaCampanha(Campanha campanha);
+
+    @Query("""
+        SELECT aa FROM AuditoriaAuditor aa JOIN FETCH aa.auditor JOIN FETCH aa.auditoria
+        WHERE aa.auditoria.campanha = :campanha
+    """)
+    List<AuditoriaAuditor> findByCampanhaComAuditorEAuditoria(@Param("campanha") Campanha campanha);
 
 }
