@@ -7,6 +7,7 @@ import br.gov.ma.emap.auditoria.dto.request.AuditoriaRequest;
 import br.gov.ma.emap.auditoria.dto.response.AuditoriaResponse;
 import br.gov.ma.emap.auditoria.exception.BusinessException;
 import br.gov.ma.emap.auditoria.model.*;
+import br.gov.ma.emap.auditoria.repository.AuditoriaAuditorRepository;
 import br.gov.ma.emap.auditoria.repository.AuditoriaHistoricoRepository;
 import br.gov.ma.emap.auditoria.repository.AuditoriaLegadoRepository;
 import br.gov.ma.emap.auditoria.repository.AuditoriaRepository;
@@ -17,8 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.YearMonth;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,10 +29,25 @@ public class AuditoriaService {
     private final UsuarioService usuarioService;
     private final AuditoriaLegadoRepository auditoriaLegadoRepository;
     private final AuditoriaHistoricoRepository auditoriaHistoricoRepository;
+    private final AuditoriaAuditorRepository auditoriaAuditorRepository;
+
+    /*@Transactional(readOnly = true)
+    public Page<AuditoriaResponse> listarOld(Long campanhaId, Pageable pageable) {
+        return repository.findByCampanhaId(campanhaId, pageable).map(AuditoriaResponse::from);
+    }*/
 
     @Transactional(readOnly = true)
     public Page<AuditoriaResponse> listar(Long campanhaId, Pageable pageable) {
-        return repository.findByCampanhaId(campanhaId, pageable).map(AuditoriaResponse::from);
+        Page<Auditoria> auditorias = repository.findByCampanhaId(campanhaId, pageable);
+        List<Long> auditoriasIds = auditorias.getContent().stream()
+                .map(Auditoria::getId).toList();
+
+        Map<Long, List<AuditoriaAuditor>> auditoresPorAuditoria = auditoriaAuditorRepository.findAtivosByAuditoriasIds(auditoriasIds)
+                .stream() .collect(Collectors.groupingBy(aa -> aa.getAuditoria().getId()));
+
+        return auditorias.map(auditoria ->
+                AuditoriaResponse.from(auditoria, auditoresPorAuditoria.getOrDefault(auditoria.getId(), List.of()))
+        );
     }
 
     @Transactional(readOnly = true)
@@ -64,7 +80,8 @@ public class AuditoriaService {
         AuditoriaHistorico historico = criarHistorico(anterior, nova, request.observacao(), usuario);
         auditoriaHistoricoRepository.save(historico);
         repository.delete(anterior);
-        return AuditoriaResponse.from(nova);
+
+        return AuditoriaResponse.from(nova, List.of());
     }
 
     private Auditoria criarNovaAuditoria(Auditoria anterior, AuditoriaRequest request, Usuario usuario) {

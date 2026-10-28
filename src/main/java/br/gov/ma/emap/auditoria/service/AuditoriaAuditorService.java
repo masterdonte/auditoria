@@ -195,7 +195,8 @@ public class AuditoriaAuditorService {
             }
 
             if (distribuicao.auditoresIds() == null || distribuicao.auditoresIds().isEmpty()) {
-                throw new BusinessException("A auditoria " + distribuicao.auditoriaId() + " não possui auditor");
+                continue;
+                //throw new BusinessException("A auditoria " + distribuicao.auditoriaId() + " não possui auditor");
             }
 
             Set<Long> auditoresInformados = new HashSet<>();

@@ -11,6 +11,8 @@ public record CampanhaResponse(
         OffsetDateTime execucaoMotor,
         Integer qtdUniverso,
         Integer qtdAmostra,
+        Long ecmCodAudit,
+        OffsetDateTime ecmLastSync,
         OffsetDateTime aprovacao,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
@@ -24,6 +26,8 @@ public record CampanhaResponse(
                 campanha.getExecucaoMotor(),
                 campanha.getQtdUniverso(),
                 campanha.getQtdAmostra(),
+                campanha.getEcmCodAudit(),
+                campanha.getEcmLastSync(),
                 campanha.getAprovacao(),
                 campanha.getCreatedAt(),
                 campanha.getUpdatedAt()

@@ -3,10 +3,12 @@ package br.gov.ma.emap.auditoria.dto.response;
 import br.gov.ma.emap.auditoria.dto.enums.CriterioAmostra;
 import br.gov.ma.emap.auditoria.dto.enums.StatusAuditoria;
 import br.gov.ma.emap.auditoria.model.Auditoria;
+import br.gov.ma.emap.auditoria.model.AuditoriaAuditor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 public record AuditoriaResponse(
         Long id,
@@ -24,10 +26,16 @@ public record AuditoriaResponse(
         CriterioAmostra criterio,
         StatusAuditoria status,
         OffsetDateTime inicio,
-        OffsetDateTime conclusao
+        OffsetDateTime conclusao,
+        List<AuditorResumoResponse> auditores
 ) {
 
-    public static AuditoriaResponse from(Auditoria auditoria) {
+    public static AuditoriaResponse from(Auditoria auditoria, List<AuditoriaAuditor> vinculos) {
+
+        List<AuditorResumoResponse> auditores = vinculos.stream()
+                .map(vinculo -> new AuditorResumoResponse(vinculo.getAuditor().getId(),vinculo.getAuditor().getNome()))
+                .toList();
+
         return new AuditoriaResponse(
                 auditoria.getId(),
                 auditoria.getCampanha().getId(),
@@ -44,7 +52,8 @@ public record AuditoriaResponse(
                 auditoria.getCriterio(),
                 auditoria.getStatus(),
                 auditoria.getInicio(),
-                auditoria.getConclusao()
+                auditoria.getConclusao(),
+                auditores
         );
     }
 }

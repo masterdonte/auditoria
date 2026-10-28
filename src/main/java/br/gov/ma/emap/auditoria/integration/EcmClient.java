@@ -32,23 +32,23 @@ public class EcmClient {
 
     public String buscarAuditoria(String titulo) {
         return ecmRestClient.get().uri(apiPath + "&audit_titulo={titulo}", titulo)
-                .attributes(clientRegistrationId("ecm")).retrieve().body(String.class);
+                .retrieve().body(String.class);
     }
 
     public EcmAuditoriaResponse criarAuditoria(EcmAddAuditoriaRequest request) {
-        return ecmRestClient.post().uri(apiPath).attributes(clientRegistrationId("ecm"))
+        return ecmRestClient.post().uri(apiPath)
                 .body(request).retrieve().onStatus(status -> status.isError(), this::tratarErro)
                 .body(EcmAuditoriaResponse.class);
     }
 
     public void adicionarAuditor(EcmAddAuditorRequest request) {
-        ecmRestClient.post().uri(apiPath).attributes(clientRegistrationId("ecm")).body(request)
+        ecmRestClient.post().uri(apiPath).body(request)
             .retrieve().onStatus(status -> status.isError(), this::tratarErro)
             .toBodilessEntity();
     }
 
     public void revogarAuditor(EcmRemAuditorRequest request) {
-        ecmRestClient.post().uri(apiPath).attributes(clientRegistrationId("ecm")).body(request)
+        ecmRestClient.post().uri(apiPath).body(request)
                 .retrieve().onStatus(status -> status.isError(), this::tratarErro)
                 .toBodilessEntity();
     }
@@ -58,10 +58,16 @@ public class EcmClient {
         try {
             JsonNode json = objectMapper.readTree(body);
             String mensagem = json.path("erro").asText();
-            throw new EcmException(mensagem);
+
+            if (mensagem.isBlank()) {
+                mensagem = "Erro na comunicação com o ECM. HTTP " + response.getStatusCode().value();
+            }
+
+            throw new EcmException("ECM: " + mensagem);
         } catch (JacksonException e) {
             throw new EcmException("Erro na comunicação com o ECM. HTTP " +response.getStatusCode().value(), e);
         }
     }
+
 }
 

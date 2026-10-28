@@ -1,35 +1,12 @@
 variables:
   SERVICE_NAME: 'auditoria-api'
-  DAST_DISABLED: true
-  TEST_DISABLED: true
-  TRIVY_TIMEOUT: 10m0s
-  TIMEOUT_SECONDS: 2600
-  ARGUMENTS_BUILD: '--build-arg MAVEN_PROFILE=prod'
-  DEV_ARGUMENTS_BUILD: '--build-arg MAVEN_PROFILE=homo'
-  CS_IMAGE: registry.portodoitaqui.com/$SERVICE_NAME:${CI_COMMIT_SHORT_SHA}
   ORG: 'porto'
 
 stages:
   - build
-  - test
   - deploy
-  - review
-  - dast
-  - staging
-  - canary
-  - production
-  - incremental rollout 10%
-  - incremental rollout 25%
-  - incremental rollout 50%
-  - incremental rollout 100%
-  - performance
-  - cleanup
-  - coverage
-  - prepare
-  - release
 
 include:
-  - template: Auto-DevOps.gitlab-ci.yml
   - project: 'emap/ci-components'
     file: '/templates/Build/Build-Docker.quay.gitlab-ci.yml'
   - project: 'emap/ci-components'

@@ -57,8 +57,8 @@ public class EcmService {
     }
 */
     public String buscarAuditoria(String titulo){
-    return ecmClient.buscarAuditoria(titulo);
-}
+        return ecmClient.buscarAuditoria(titulo);
+    }
 
     public Long criarAuditoria(Campanha campanha, List<AuditoriaAuditor> vinculos) {
 

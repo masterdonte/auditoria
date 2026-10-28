@@ -19,6 +19,12 @@ public interface AuditoriaAuditorRepository extends JpaRepository<AuditoriaAudit
     List<AuditoriaAuditor> findByAuditoriaAndFimIsNull(Auditoria auditoria);
     Optional<AuditoriaAuditor> findByAuditoriaAndAuditorAndFimIsNull(Auditoria auditoria, Usuario auditor);
     boolean existsByAuditoriaCampanha(Campanha campanha);
+
+    @Query("""
+        SELECT aa FROM AuditoriaAuditor aa JOIN FETCH aa.auditor WHERE aa.auditoria.id IN :auditoriasIds AND aa.fim IS NULL
+    """)
+    List<AuditoriaAuditor> findAtivosByAuditoriasIds(@Param("auditoriasIds") List<Long> auditoriasIds);
+
     List<AuditoriaAuditor> findByAuditoriaCampanha(Campanha campanha);
 
     @Query("""
@@ -26,5 +32,10 @@ public interface AuditoriaAuditorRepository extends JpaRepository<AuditoriaAudit
         WHERE aa.auditoria.campanha = :campanha
     """)
     List<AuditoriaAuditor> findByCampanhaComAuditorEAuditoria(@Param("campanha") Campanha campanha);
+
+    @Query("""
+        SELECT aa FROM AuditoriaAuditor aa JOIN FETCH aa.auditor WHERE aa.auditoria = :auditoria AND aa.fim IS NULL
+    """)
+    List<AuditoriaAuditor> findAtivosByAuditoria(@Param("auditoria") Auditoria auditoria);
 
 }

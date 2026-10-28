@@ -58,6 +58,7 @@ CREATE TABLE public.campanha (
      execucao_motor timestamp(6) with time zone,
      parametrizacao_id bigint NOT NULL,
      ecm_cod_audit bigint NULL,
+     ecm_last_sync timestamp(6) with time zone null,
      created_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
      created_by bigint NOT NULL,
      updated_at timestamp(6) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
