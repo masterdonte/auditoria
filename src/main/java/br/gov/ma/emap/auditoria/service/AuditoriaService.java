@@ -31,11 +31,6 @@ public class AuditoriaService {
     private final AuditoriaHistoricoRepository auditoriaHistoricoRepository;
     private final AuditoriaAuditorRepository auditoriaAuditorRepository;
 
-    /*@Transactional(readOnly = true)
-    public Page<AuditoriaResponse> listarOld(Long campanhaId, Pageable pageable) {
-        return repository.findByCampanhaId(campanhaId, pageable).map(AuditoriaResponse::from);
-    }*/
-
     @Transactional(readOnly = true)
     public Page<AuditoriaResponse> listar(Long campanhaId, Pageable pageable) {
         Page<Auditoria> auditorias = repository.findByCampanhaId(campanhaId, pageable);

@@ -17,20 +17,23 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
+@RequestMapping("/")
 public class AuthController {
 
     private final AuthService service;
     private final ClickHouseService clickService;
-    private final LdapService ldapService;
 
-    private final EcmService ecmService;
-
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid AuthRequest credential) {
         return ResponseEntity.ok(service.login(credential));
     }
 
+    @GetMapping("/status")
+    public ResponseEntity<?> status() {
+        return ResponseEntity.ok(clickService.version());
+    }
+
+    /*
     @GetMapping("/version")
     public ResponseEntity<?> version() {
         return ResponseEntity.ok(clickService.version());
@@ -56,11 +59,6 @@ public class AuthController {
     public ResponseEntity<?> buscaAuditoriaEcm(@RequestParam String titulo) {
         return ResponseEntity.ok(ecmService.buscarAuditoria(titulo));
     }
-
-    /*
-    @GetMapping("/criarAuditoriaEcm")
-    public ResponseEntity<?> criarAuditoriaEcm(@RequestParam Long campanhaId) {
-        return ResponseEntity.ok(ecmService.criarAuditoriaApagar(campanhaId));
-    }
     */
+
 }

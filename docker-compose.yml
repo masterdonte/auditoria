@@ -4,8 +4,8 @@ services:
     image: postgres:16.8
     container_name: postgres_16_8
     environment:
-      POSTGRES_USER: ${POST_USER}
-      POSTGRES_PASSWORD: ${POST_PASS}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345678
       POSTGRES_DB: auditoria
     ports:
       - "5432:5432"
@@ -32,9 +32,6 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       CLICK_USER: ${CLICK_USER}
       CLICK_PASS: ${CLICK_PASS}
-      POST_URL:  ${POST_URL}
-      POST_USER: ${POST_USER}
-      POST_PASS: ${POST_PASS}
       LDAP_PASS: ${LDAP_PASS}
     depends_on:
       postgres:
