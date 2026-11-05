@@ -33,11 +33,12 @@ public class AuthController {
         return ResponseEntity.ok(clickService.version());
     }
 
-    /*
-    @GetMapping("/version")
-    public ResponseEntity<?> version() {
-        return ResponseEntity.ok(clickService.version());
+
+    @GetMapping("/clickuser")
+    public ResponseEntity<?> buscarEcmUserByLogin(@RequestParam String login) {
+        return ResponseEntity.ok(clickService.buscarEcmUserId(login));
     }
+    /*
 
     @GetMapping("/search")
     public ResponseEntity<?> search(@RequestParam String login) {
@@ -48,11 +49,6 @@ public class AuthController {
     public ResponseEntity<List<ProcessoDTO>> cubo(@RequestParam YearMonth ref) {
         List<ProcessoDTO> processos = clickService.buscarDadosCubo(ref);
         return ResponseEntity.ok(processos);
-    }
-
-    @GetMapping("/ecmUser")
-    public ResponseEntity<?> buscarEcmUserByLogin(@RequestParam String login) {
-        return ResponseEntity.ok(clickService.buscarEcmUserId(login));
     }
 
     @GetMapping("/teste")
