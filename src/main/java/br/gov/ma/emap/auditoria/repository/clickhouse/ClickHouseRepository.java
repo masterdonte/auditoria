@@ -29,7 +29,7 @@ public class ClickHouseRepository {
                 SELECT
                     MAX(A.ID_LAN) AS LANID,
                     B.COD_DOCUMENTO AS ECMID,
-                    A.NOME AS FORNECEDOR,
+                    MAX(A.NOME) AS FORNECEDOR,
                     A.NR_PROCESSO AS PROCESSO,
                     A.CONTRATO,
                     B.DOC_NOME AS OBJETO,
@@ -42,7 +42,7 @@ public class ClickHouseRepository {
                 INNER JOIN PROCESSOS_SILVER.PROCESSOS B ON B.DOC_NUMERO = A.NR_PROCESSO AND B.TIPO_PROCESSO = 'PROCESSO'
                 INNER JOIN PROCESSOS_SILVER.DEPARTAMENTOS C ON C.COD = B.COD_DEPARTAMENTO_CADASTRO AND C.COD_DIRETORIA IS NOT NULL              \s
                 WHERE A.DATA_BAIXA >= ? AND A.DATA_BAIXA < ? AND ifNull(CLASSIFICACAO, '') <> 'Passagens/Diárias'
-                GROUP BY B.COD_DOCUMENTO, A.NOME, A.NR_PROCESSO, A.CONTRATO, B.DOC_NOME, A.DATA_BAIXA, A.CLASSIFICACAO, C.NOME, C.DIRETORIA               \s
+                GROUP BY B.COD_DOCUMENTO, A.NR_PROCESSO, A.CONTRATO, B.DOC_NOME, A.DATA_BAIXA, A.CLASSIFICACAO, C.NOME, C.DIRETORIA               \s
                 ORDER BY A.DATA_BAIXA DESC                
                 """;
 
